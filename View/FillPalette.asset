@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81887884301279c41907c572dcea97d4, type: 3}
+  m_Name: FillPalette
+  m_EditorClassIdentifier: Assembly-CSharp::FillPalette
+  _views:
+  - {fileID: 11400000, guid: 36435580fd547ea46bd1558c956602aa, type: 2}
+  - {fileID: 11400000, guid: 5a83815aa351ee047883103f13a5e78a, type: 2}
+  - {fileID: 11400000, guid: d0fdf1b1feb7afb4db82f8db56fb3180, type: 2}
+  - {fileID: 11400000, guid: 35094f84a46fce0498a81d41bf09f52a, type: 2}
+  - {fileID: 11400000, guid: 9358813e09d66114dad963f5a69c0f84, type: 2}
+  - {fileID: 11400000, guid: cbb34ad2c6c34cc4d9f99d48a72f3ac9, type: 2}
+  - {fileID: 11400000, guid: a461cb3b82f6d8e41854e91e511a7be4, type: 2}
+  - {fileID: 11400000, guid: 825941b1c47fbee4cab6ec4816df5efa, type: 2}

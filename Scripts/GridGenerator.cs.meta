@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 69c8c8ddb136fe64e82dd375c5dc394d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - cellPrefab: {fileID: 5541359385549734511, guid: 1692668b0a12a8e498d4a7018b300c3c, type: 3}
+  - gridParent: {instanceID: 0}
+  - topLabelsParent: {instanceID: 0}
+  - leftLabelsParent: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
