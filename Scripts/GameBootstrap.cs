@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -8,58 +8,54 @@ using UnityEngine;
 public class GameBootstrap : MonoBehaviour
 {
     [SerializeField] private TextAsset mapJson;
-    [SerializeField] private int playerNum = 1;
-    [SerializeField] private int startRow = 0;
-    [SerializeField] private int startCol = 0;
 
-    [SerializeField] private DragonChoiceUI dragonChoiceUI; // см. ниже
-    [SerializeField] private DragonFightUI dragonFightUI;   // см. ниже
+    [SerializeField] private DragonChoiceUI dragonChoiceUI;
+    [SerializeField] private DragonFightUI dragonFightUI;
     [SerializeField] private HudController hud;
 
     public TurnController Turns { get; private set; }
     public GameContext Context { get; private set; }
 
+    public Map Map => Context?.Map;
+    public PlayerState Player => Context?.Player;
+
     private void Awake()
     {
         Map map = Map.LoadFromJson(FileFromTextAsset(mapJson));
 
-        var player = new PlayerState(playerNum, startRow, startCol);
+        GameLaunchArgs.Consume(out int pNum, out int sRow, out int sCol);
+        var player = new PlayerState(pNum, sRow, sCol);
+
         Context = new GameContext(map, player);
         Context.Logger = Debug.Log;
 
         Turns = new TurnController(map, Context);
 
-        // Телепорт и река маршрутизируем во внутренние методы TurnController.
-        Context.TeleportAction = (r, c) => TeleportViaTurns(r, c);
-        Context.RiverCarryAction = (r, c, d) => RiverViaTurns(r, c, d);
-
-        // UI дракона.
         Context.DragonChoiceHandler = req =>
             dragonChoiceUI.Show(req, giveKey => Context.OnDragonChoice(req.Row, req.Col, giveKey));
 
         Context.DragonFightHandler = req =>
             dragonFightUI.Show(req, fight => Context.OnDragonFight(req.Row, req.Col, fight));
 
+        // OnTurnCompleted вызывается ДО FlushTurnMessages, поэтому:
+        //   * Context.Messages  — сообщения текущего хода (ещё не очищены);
+        //   * Context.History   — уже завершённые ходы (текущего там ещё нет).
         Context.OnTurnCompleted = () =>
         {
-            hud.ShowTurnMessages(Context.Messages);          // полотно текста за ход
-            hud.AppendHistory(Context.History[^1]);          // общая история
+            // 1. Текст текущего хода.
+            hud.ShowTurnMessages(Context.Messages);
+
+            // 2. Визуал клетки.
+            var currentCell = Map[Player.Row, Player.Col];
+            var animator = FindFirstObjectByType<TurnAnimator>();
+            if (animator != null)
+                animator.ForceRedraw(currentCell, Context);
+
+            // 3. История: текущий ход ещё не в History — добавляем его вручную
+            //    ровно так же, как это сделает FlushTurnMessages.
+            if (Context.Messages.Count > 0)
+                hud.AppendHistory(string.Join(" ", Context.Messages));
         };
-    }
-
-    private void TeleportViaTurns(int r, int c)
-    {
-        // Небольшая хитрость: TeleportAction вызывается из Portal.OnEnter,
-        // а сам TurnController уже в ApplyEffects. Чтобы не рекурсировать
-        // неправильно, телепорт применяем через рефлексию приватного метода
-        // или добавляем публичный метод. Ниже — публичный метод в TurnController
-        // (см. примечание).
-        Turns.TeleportAndApply(r, c);
-    }
-
-    private void RiverViaTurns(int r, int c, Direction d)
-    {
-        Turns.RiverCarryAndApply(r, c, d);
     }
 
     private static string FileFromTextAsset(TextAsset ta)

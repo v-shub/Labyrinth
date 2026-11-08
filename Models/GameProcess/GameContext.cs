@@ -9,8 +9,17 @@ public class GameContext
     /// <summary>Направление последнего хода (для сообщений реки и резинки).</summary>
     public Direction? LastMoveDirection { get; set; }
 
-    /// <summary>Отложенные эффекты Swamp: клетка для обработки на ходе после пропущенного.</summary>
-    public (int row, int col)? DelayedCell { get; set; }
+    /// <summary>
+    /// Отложенные эффекты Swamp: клетка, контекст входа (arrival + направление)
+    /// для обработки на ходе после пропущенного.
+    /// </summary>
+    public (int row, int col, Arrival arrival, Direction? enteredFrom)? DelayedCell { get; set; }
+    /// <summary>
+    /// Предметы, подобранные в текущем ходу: (row, col, fill). Нужны для отрисовки:
+    /// из CellContainer.Fills они уже удалены, но игрок должен увидеть, что подобрал.
+    /// Очищается в TurnController.FinishTurn после отрисовки.
+    /// </summary>
+    public List<(int row, int col, ICellFill fill)> PickedUpThisTurn { get; } = new();
 
     // ----- Сообщения -----
     public List<string> Messages { get; } = new();   // текущий ход

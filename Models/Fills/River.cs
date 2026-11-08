@@ -25,12 +25,17 @@ public class River : CellFillBase
 
     public override void OnEnter(GameContext ctx, int row, int col, Arrival arrival)
     {
-        // Сообщение о характере входа (кроме смыва — там уже «Вас смыло по течению.»).
+        // Сообщение о характере входа.
+        // «Вы пошли по течению.» и «Вы вышли из реки.» генерирует TurnController.Move
+        // (при выходе с клетки реки). Здесь — только вход.
         if (arrival != Arrival.FromRiver)
         {
-            bool cameAlongFlow = ctx.LastMoveDirection == FlowIn;
-            if (cameAlongFlow) ctx.AddMessage("Вы пошли по течению.");
-            else ctx.AddMessage("Вы вошли в реку.");
+            // Вход «по течению» — это продолжение движения по реке: игрок двигался
+            // в направлении FlowIn (значит, предыдущая клетка имела FlowOut == FlowIn).
+            bool continuedAlongFlow = arrival == Arrival.FromMove
+                                      && ctx.LastMoveDirection == FlowIn;
+            if (!continuedAlongFlow)
+                ctx.AddMessage("Вы вошли в реку.");
         }
 
         // Исток/устье — всегда после входа/смыва.
