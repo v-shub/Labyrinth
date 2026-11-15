@@ -80,7 +80,11 @@ public static class MapValidator
         ValidatePortals(map, errors);
 
         if (errors.Count == 0)
+        {
             ValidateConnectivity(map, errors);
+            if (errors.Count == 0)
+                ValidateReachability(map, errors);
+        }
 
         if (errors.Count > 0)
             throw new MapValidationException(errors);
@@ -221,6 +225,10 @@ public static class MapValidator
         {
             foreach (var entry in AllDirections)
             {
+                // Вход со стороны стены невозможен — игрок не может прийти оттуда.
+                if (Neighbor(map, r, c, entry) == null)
+                    continue;
+
                 states.Add(new State(r, c, entry, Arrival.FromMove));
                 states.Add(new State(r, c, entry, Arrival.FromPortal));
                 states.Add(new State(r, c, entry, Arrival.FromRiver));
@@ -341,6 +349,50 @@ public static class MapValidator
         return result;
     }
 
+    // ---------- 7. Достижимость: из любой клетки можно попасть в любую другую ----------
+
+    private static void ValidateReachability(Map map, List<string> errors)
+    {
+        var allCells = AllCells(map).ToList();
+
+        foreach (var (sr, sc) in allCells)
+        {
+            var start = new State(sr, sc, null, Arrival.Start);
+            var reached = BfsReachedCells(map, start);
+
+            foreach (var (tr, tc) in allCells)
+            {
+                if (reached.Contains((tr, tc))) continue;
+
+                errors.Add($"Из клетки ({sr},{sc}) нельзя попасть в клетку ({tr},{tc})");
+                break; // достаточно одной ошибки на стартовую клетку
+            }
+        }
+    }
+
+    private static HashSet<(int, int)> BfsReachedCells(Map map, State start)
+    {
+        var visited = new HashSet<State> { start };
+        var queue = new Queue<State>();
+        queue.Enqueue(start);
+        var reached = new HashSet<(int, int)> { (start.Row, start.Col) };
+
+        while (queue.Count > 0)
+        {
+            var s = queue.Dequeue();
+            foreach (var next in GetNextStates(map, s))
+            {
+                if (visited.Add(next))
+                {
+                    queue.Enqueue(next);
+                    reached.Add((next.Row, next.Col));
+                }
+            }
+        }
+
+        return reached;
+    }
+
     // ============================================================
     //  Переходы
     // ============================================================
@@ -366,19 +418,53 @@ public static class MapValidator
             yield break;
         }
 
-        // 2) Река — смыв по FlowOut; вход не важен.
+        // 2) Река
         var river = fills.OfType<River>().FirstOrDefault();
-        if (river != null && riverCanFire)
+        if (river != null)
         {
-            if (river.End == RiverEnd.Mouth) yield break;
-
-            var next = Step(map, s.Row, s.Col, river.FlowOut);
-            if (next.HasValue)
+            if (s.Arrival == Arrival.FromRiver)
             {
-                var n = next.Value;
-                yield return new State(n.Row, n.Col, n.Entry, Arrival.FromRiver);
+                // Игрок стоит на реке и выбирает, куда пойти.
+                // Против течения (FlowIn) идти нельзя.
+                foreach (var dir in AllDirections)
+                {
+                    if (dir == river.FlowIn) continue;
+                    var next = Step(map, s.Row, s.Col, dir);
+                    if (next.HasValue)
+                    {
+                        var n = next.Value;
+                        yield return new State(n.Row, n.Col, n.Entry, Arrival.FromMove);
+                    }
+                }
+                yield break;
             }
-            yield break;
+            else if (riverCanFire)
+            {
+                // Вход не смывом — принудительно смывает по FlowOut.
+                var next = Step(map, s.Row, s.Col, river.FlowOut);
+                if (next.HasValue)
+                {
+                    var n = next.Value;
+                    yield return new State(n.Row, n.Col, n.Entry, Arrival.FromRiver);
+                }
+                else
+                {
+                    // Смыв в стену (устье) — игрок остаётся в устье.
+                    // На следующем ходу он в режиме FromRiver, выбирает направление.
+                    // Эмулируем это сразу: даём переходы, как из FromRiver.
+                    foreach (var dir in AllDirections)
+                    {
+                        if (dir == river.FlowIn) continue;
+                        var step = Step(map, s.Row, s.Col, dir);
+                        if (step.HasValue)
+                        {
+                            var n = step.Value;
+                            yield return new State(n.Row, n.Col, n.Entry, Arrival.FromMove);
+                        }
+                    }
+                }
+                yield break;
+            }
         }
 
         // 3) Резинка — старт: любой выход; иначе только откуда зашёл.
