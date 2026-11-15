@@ -54,7 +54,7 @@ public class GridGenerator : MonoBehaviour
     {
         for (int x = 0; x < cols; x++)
         {
-            CreateLabel(topLabelsParent, GetColumnLetter(x).ToString());
+            CreateLabel(topLabelsParent, ColumnLabelUtil.GetColumnLetter(x).ToString());
         }
     }
 
@@ -78,29 +78,4 @@ public class GridGenerator : MonoBehaviour
         text.color = labelColor;
     }
 
-    /// <summary>
-    /// Возвращает букву для столбца по индексу.
-    /// 0 → А, 1 → Б, ..., 6 → Ё, 7 → Ж, ...
-    /// Работает для любого количества столбцов, пока хватает алфавита.
-    /// </summary>
-    private static char GetColumnLetter(int index)
-    {
-        if (index < 0) return '?';
-
-        // Позиция Ё — отдаём вручную.
-        if (index == YoIndex) return YoLetter;
-
-        // До Ё — обычная арифметика (А..Е).
-        // После Ё — сдвигаем индекс на 1 назад, потому что Ё "вставлена" между Е и Ж.
-        int shift = index > YoIndex ? -1 : 0;
-        char letter = (char)(FirstLetter + index + shift);
-
-        if (letter > 'Я')
-        {
-            Debug.LogWarning($"GridGenerator: закончились буквы для столбца {index}.");
-            return '?';
-        }
-
-        return letter;
-    }
 }
