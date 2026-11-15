@@ -25,7 +25,7 @@ public class TouchInputUI : MonoBehaviour
     private void Update()
     {
         bool busy = (animator != null && animator.Busy) || game.Context.IsWon;
-        bool skip = game.Context.Player.SkipNextTurn;
+        bool skip = game.Context.SwampPhase != SwampPhase.None;
         bool blocked = busy || skip;
 
         upButton.interactable = !blocked;
@@ -42,7 +42,7 @@ public class TouchInputUI : MonoBehaviour
     public void DoSkipTurn()
     {
         if (animator == null || animator.Busy) return;
-        if (!game.Context.Player.SkipNextTurn) return;
+        if (game.Context.SwampPhase == SwampPhase.None) return;
         animator.RequestBeginTurn();
     }
 
@@ -62,7 +62,7 @@ public class TouchInputUI : MonoBehaviour
 
     private bool TryConsumeSkipTurn()
     {
-        if (!game.Context.Player.SkipNextTurn) return false;
+        if (game.Context.SwampPhase == SwampPhase.None) return false;
         animator.RequestBeginTurn();
         return true;
     }

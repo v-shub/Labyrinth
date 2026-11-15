@@ -10,6 +10,11 @@ public class GameContext
     public Direction? LastMoveDirection { get; set; }
 
     /// <summary>
+    /// Состояние болота. Заменяет прежний PlayerState.SkipNextTurn и SwampSkipShown.
+    /// None — не в болоте; SkipPending — ждём Ход 2; AwaitingEffects — ждём Ход 3.
+    /// </summary>
+    public SwampPhase SwampPhase { get; set; } = SwampPhase.None;
+    /// <summary>
     /// Отложенные эффекты Swamp: клетка, контекст входа (arrival + направление)
     /// для обработки на ходе после пропущенного.
     /// </summary>

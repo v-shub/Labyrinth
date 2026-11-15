@@ -44,7 +44,6 @@ public class TurnController
 
         _ctx.Messages.Clear();
 
-        // «Обязан двигаться» — пропуск запрещён.
         if (_ctx.Player.MustMoveAgain)
         {
             _ctx.AddMessage("Вы должны сделать ход.");
@@ -52,13 +51,41 @@ public class TurnController
             return;
         }
 
-        if (_ctx.Player.SkipNextTurn)
+        switch (_ctx.SwampPhase)
         {
-            _ctx.Player.SkipNextTurn = false;
-            _ctx.AddMessage("Вы пропускаете этот ход.");
-        }
+            case SwampPhase.None:
+                // Нечего пропускать — просто завершаем ход.
+                FinishTurn();
+                return;
 
-        FinishTurn();
+            case SwampPhase.SkipPending:
+                // Ход 2: показываем пропуск. SwampPhase остаётся SkipPending —
+                // болото видно, кнопки заблокированы. Переходим в AwaitingEffects.
+                _ctx.SwampPhase = SwampPhase.AwaitingEffects;
+                _ctx.AddMessage("Вы пропускаете этот ход.");
+                FinishTurn();
+                return;
+
+            case SwampPhase.AwaitingEffects:
+                // Ход 3: выходим из болота и применяем отложенные эффекты.
+                // Игрок не двигается по желанию — только эффекты.
+                _ctx.SwampPhase = SwampPhase.None;
+                _ctx.AddMessage("Вы выбрались из болота.");
+
+                if (_ctx.DelayedCell.HasValue)
+                {
+                    var (r, c, arr, from) = _ctx.DelayedCell.Value;
+                    _ctx.DelayedCell = null;
+                    ApplyOtherEffects(r, c, arr, from, suppressEmptyMessage: true);
+                }
+                else
+                {
+                    _ctx.AddMessage("Вы прошли.");
+                }
+
+                FinishTurn();
+                return;
+        }
     }
 
     /// <summary>Ход игрока в направлении.</summary>
@@ -200,11 +227,10 @@ public class TurnController
         _ctx.Player.MustMoveAgain = false;
 
         // Защита: если UI не перехватил пропуск — обрабатываем здесь.
-        if (_ctx.Player.SkipNextTurn)
+        // Защита: если UI не перехватил пропуск — обрабатываем здесь.
+        if (_ctx.SwampPhase != SwampPhase.None)
         {
-            _ctx.Player.SkipNextTurn = false;
-            _ctx.AddMessage("Вы пропускаете этот ход.");
-            FinishTurn();
+            BeginTurn();
             return true;
         }
 

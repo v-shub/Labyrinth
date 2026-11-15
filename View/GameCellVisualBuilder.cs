@@ -46,7 +46,7 @@ public static class GameCellVisualBuilder
         }
 
         // Болото-режим: из клетки видно только болото.
-        if (ctx.Player.SkipNextTurn)
+        if (ctx.SwampPhase != SwampPhase.None)
         {
             if (byType.TryGetValue(typeof(Swamp), out var sw))
                 result.Add(new CellLayer(sw.Fill, sw.Sprite, LayerMode.Full, 0, null));

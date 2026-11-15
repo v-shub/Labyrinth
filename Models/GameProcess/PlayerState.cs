@@ -9,7 +9,6 @@ public class PlayerState
     public int SwordCount { get; private set; }
     public bool HasSword => SwordCount > 0;
 
-    public bool SkipNextTurn { get; set; }
     public bool MustMoveAgain { get; set; }
 
     // Резинка: активна ли она и откуда игрок вошёл.

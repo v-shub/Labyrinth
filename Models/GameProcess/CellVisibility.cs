@@ -26,7 +26,7 @@ public static class CellVisibility
 
             // Болото видно, только когда игрок «в болоте» (пропускает ход).
             case Swamp _:
-                return p.SkipNextTurn;
+                return ctx.SwampPhase != SwampPhase.None;
 
             // Река, портал, дракон, меч — игрок знает всегда.
             default:
