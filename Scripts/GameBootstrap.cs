@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -37,25 +36,21 @@ public class GameBootstrap : MonoBehaviour
         Context.DragonFightHandler = req =>
             dragonFightUI.Show(req, fight => Context.OnDragonFight(req.Row, req.Col, fight));
 
-        // OnTurnCompleted вызывается ДО FlushTurnMessages, поэтому:
-        //   * Context.Messages  — сообщения текущего хода (ещё не очищены);
-        //   * Context.History   — уже завершённые ходы (текущего там ещё нет).
         Context.OnTurnCompleted = () =>
         {
-            // 1. Текст текущего хода.
             hud.ShowTurnMessages(Context.Messages);
 
-            // 2. Визуал клетки.
             var currentCell = Map[Player.Row, Player.Col];
             var animator = FindFirstObjectByType<TurnAnimator>();
             if (animator != null)
                 animator.ForceRedraw(currentCell, Context);
 
-            // 3. История: текущий ход ещё не в History — добавляем его вручную
-            //    ровно так же, как это сделает FlushTurnMessages.
             if (Context.Messages.Count > 0)
                 hud.AppendHistory(string.Join(" ", Context.Messages));
         };
+
+        // Старт игры: сразу применяем эффекты стартовой клетки.
+        Turns.StartGame();
     }
 
     private static string FileFromTextAsset(TextAsset ta)

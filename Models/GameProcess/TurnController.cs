@@ -35,6 +35,41 @@ public class TurnController
     // ============================================================
 
     /// <summary>
+    /// Старт игры: сразу применяем эффекты стартовой клетки, не дожидаясь
+    /// нажатия кнопки движения. После этого игрок может делать обычные ходы.
+    /// </summary>
+    public void StartGame()
+    {
+        if (_ctx.IsWon) return;
+
+        _ctx.Messages.Clear();
+
+        int startRow = _ctx.Player.Row;
+        int startCol = _ctx.Player.Col;
+
+        // Приветственное сообщение о стартовой клетке.
+        string cellName = ColumnLabelUtil.GetCellName(startRow, startCol);
+        _ctx.AddMessage($"Вы приземлились на клетку {cellName}.");
+
+        // Запоминаем количество сообщений после приветствия — чтобы понять,
+        // добавили ли эффекты стартовой клетки хоть что-то.
+        int before = _ctx.Messages.Count;
+
+        // Применяем эффекты стартовой клетки (один раз за игру).
+        // suppressEmptyMessage: true — «Вы прошли.» при необходимости добавим сами,
+        // чтобы не задвоить и не вывести его при телепорте/реке.
+        _firstTurnDone = true;
+        ApplyEffects(startRow, startCol, Arrival.Start, enteredFrom: null,
+                     suppressEmptyMessage: true);
+
+        // Если эффекты стартовой клетки не добавили ни одного сообщения —
+        // на клетке ничего нет, выводим «Вы прошли.».
+        if (_ctx.Messages.Count == before)
+            _ctx.AddMessage("Вы прошли.");
+
+        FinishTurn();
+    }
+    /// <summary>
     /// Потратить ход на пропуск (болото). Вызывается из UI, когда SkipNextTurn == true.
     /// Если игрок обязан двигаться (MustMoveAgain) — пропуск запрещён.
     /// </summary>
