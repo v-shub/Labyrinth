@@ -36,7 +36,8 @@ public class GameBootstrap : MonoBehaviour
         Context.DragonFightHandler = req =>
             dragonFightUI.Show(req, fight => Context.OnDragonFight(req.Row, req.Col, fight));
 
-        Context.OnTurnCompleted = () =>
+        // Общий обработчик завершения хода и разрешения выбора дракона.
+        System.Action renderAndHistory = () =>
         {
             hud.ShowTurnMessages(Context.Messages);
 
@@ -48,6 +49,9 @@ public class GameBootstrap : MonoBehaviour
             if (Context.Messages.Count > 0)
                 hud.AppendHistory(string.Join(" ", Context.Messages));
         };
+
+        Context.OnTurnCompleted = renderAndHistory;
+        Context.OnDragonResolved = renderAndHistory;
 
         // Старт игры: сразу применяем эффекты стартовой клетки.
         Turns.StartGame();

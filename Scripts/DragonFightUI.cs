@@ -12,23 +12,42 @@ public class DragonFightUI : MonoBehaviour
     [SerializeField] private Button skipButton;
 
     private Action<bool> _callback;
+    private bool _initialized;
 
-    private void Awake()
+    private void Awake() => Init();
+
+    private void Init()
     {
-        panel.SetActive(false);
-        fightButton.onClick.AddListener(() => Confirm(true));
-        skipButton.onClick.AddListener(() => Confirm(false));
+        if (_initialized) return;
+        _initialized = true;
+
+        if (panel != null) panel.SetActive(false);
+
+        if (fightButton != null)
+        {
+            fightButton.onClick.RemoveAllListeners();
+            fightButton.onClick.AddListener(() => Confirm(true));
+        }
+        if (skipButton != null)
+        {
+            skipButton.onClick.RemoveAllListeners();
+            skipButton.onClick.AddListener(() => Confirm(false));
+        }
     }
 
     public void Show(DragonFightRequest req, Action<bool> callback)
     {
+        Init();
+
+        if (!gameObject.activeSelf) gameObject.SetActive(true);
+        if (panel != null) panel.SetActive(true);
+
         _callback = callback;
-        panel.SetActive(true);
     }
 
     private void Confirm(bool fight)
     {
-        panel.SetActive(false);
+        if (panel != null) panel.SetActive(false);
         var cb = _callback;
         _callback = null;
         cb?.Invoke(fight);

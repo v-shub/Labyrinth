@@ -12,9 +12,13 @@ public static class DragonStorage
                     yield return (r, c);
     }
 
+    /// <summary>Есть ли у конкретного дракона в (row,col) ключ игрока.</summary>
+    public static bool HoldsKeyOf(Map map, int row, int col, int playerNum)
+        => map[row, col].Fills.OfType<Key>().Any(k => k.PlayerNum == playerNum);
+
+    /// <summary>Есть ли ключ игрока у какого-либо дракона (для общих проверок).</summary>
     public static bool HoldsKeyOf(Map map, int playerNum)
-        => DragonCells(map).Any(rc =>
-            map[rc.r, rc.c].Fills.OfType<Key>().Any(k => k.PlayerNum == playerNum));
+        => DragonCells(map).Any(rc => HoldsKeyOf(map, rc.r, rc.c, playerNum));
 
     public static void TakeKey(Map map, int row, int col, int playerNum)
     {

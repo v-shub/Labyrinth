@@ -47,28 +47,21 @@ public class TurnController
         int startRow = _ctx.Player.Row;
         int startCol = _ctx.Player.Col;
 
-        // Приветственное сообщение о стартовой клетке.
         string cellName = ColumnLabelUtil.GetCellName(startRow, startCol);
         _ctx.AddMessage($"Вы приземлились на клетку {cellName}.");
 
-        // Запоминаем количество сообщений после приветствия — чтобы понять,
-        // добавили ли эффекты стартовой клетки хоть что-то.
         int before = _ctx.Messages.Count;
 
-        // Применяем эффекты стартовой клетки (один раз за игру).
-        // suppressEmptyMessage: true — «Вы прошли.» при необходимости добавим сами,
-        // чтобы не задвоить и не вывести его при телепорте/реке.
         _firstTurnDone = true;
         ApplyEffects(startRow, startCol, Arrival.Start, enteredFrom: null,
                      suppressEmptyMessage: true);
 
-        // Если эффекты стартовой клетки не добавили ни одного сообщения —
-        // на клетке ничего нет, выводим «Вы прошли.».
         if (_ctx.Messages.Count == before)
             _ctx.AddMessage("Вы прошли.");
 
         FinishTurn();
     }
+
     /// <summary>
     /// Потратить ход на пропуск (болото). Вызывается из UI, когда SkipNextTurn == true.
     /// Если игрок обязан двигаться (MustMoveAgain) — пропуск запрещён.
@@ -89,21 +82,16 @@ public class TurnController
         switch (_ctx.SwampPhase)
         {
             case SwampPhase.None:
-                // Нечего пропускать — просто завершаем ход.
                 FinishTurn();
                 return;
 
             case SwampPhase.SkipPending:
-                // Ход 2: показываем пропуск. SwampPhase остаётся SkipPending —
-                // болото видно, кнопки заблокированы. Переходим в AwaitingEffects.
                 _ctx.SwampPhase = SwampPhase.AwaitingEffects;
                 _ctx.AddMessage("Вы пропускаете этот ход.");
                 FinishTurn();
                 return;
 
             case SwampPhase.AwaitingEffects:
-                // Ход 3: выходим из болота и применяем отложенные эффекты.
-                // Игрок не двигается по желанию — только эффекты.
                 _ctx.SwampPhase = SwampPhase.None;
                 _ctx.AddMessage("Вы выбрались из болота.");
 
@@ -130,9 +118,10 @@ public class TurnController
 
         _ctx.Messages.Clear();
 
-        // Начало хода: защита от пропуска, эффекты стартовой клетки (один раз),
-        // отложенные эффекты болота. Если начало хода само завершило ход — выходим.
         if (HandleTurnStart()) return;
+
+        // Игрок совершает ход — обязанность «бежать от дракона» снимается.
+        _ctx.Player.MustMoveAgain = false;
 
         _ctx.AddMessage($"Вы выбрали пойти {DirectionUtil.ToRussian(dir)}.");
 
@@ -214,6 +203,9 @@ public class TurnController
             return;
         }
 
+        // Успешный нырок — снимаем обязанность.
+        _ctx.Player.MustMoveAgain = false;
+
         _ctx.Player.LeaveRubber();
         _ctx.AddMessage("Вы попали в портал. Вы вышли из портала.");
         TeleportAndApply(next.Value.row, next.Value.col);
@@ -242,7 +234,6 @@ public class TurnController
 
         _ctx.Player.Row = nr;
         _ctx.Player.Col = nc;
-        // Сообщение «Вас смыло по течению.» уже добавлено в River.OnEnter — здесь не дублируем.
         ApplyEffects(nr, nc, Arrival.FromRiver, enteredFrom: DirectionUtil.Opposite(flowOut));
     }
 
@@ -252,17 +243,13 @@ public class TurnController
 
     /// <summary>
     /// Начало хода: защита от пропуска, эффекты стартовой клетки (один раз за игру),
-    /// отложенные эффекты болота. Возвращает true, если ход уже завершён
-    /// (пропуск, победа или эффекты переместили игрока).
+    /// отложенные эффекты болота. Возвращает true, если ход уже завершён.
     /// </summary>
     private bool HandleTurnStart()
     {
-        // «Обязан двигаться» действует только на текущий ход — сбрасываем в начале.
-        // (Дракон на новой клетке может снова установить флаг в этом же ходу.)
-        _ctx.Player.MustMoveAgain = false;
+        // MustMoveAgain НЕ сбрасываем здесь — он нужен BeginTurn для запрета пропуска.
+        // Сбрасывается в Move/DiveIntoPortal при реальном действии игрока.
 
-        // Защита: если UI не перехватил пропуск — обрабатываем здесь.
-        // Защита: если UI не перехватил пропуск — обрабатываем здесь.
         if (_ctx.SwampPhase != SwampPhase.None)
         {
             BeginTurn();
@@ -274,15 +261,12 @@ public class TurnController
 
         if (!_firstTurnDone)
         {
-            // Первый ход: применяем эффекты стартовой клетки (все, кроме резинки —
-            // резинка сама игнорирует Arrival.Start).
             _firstTurnDone = true;
             ApplyEffects(startRow, startCol, Arrival.Start, enteredFrom: null,
                          suppressEmptyMessage: true);
         }
         else if (_ctx.DelayedCell.HasValue)
         {
-            // Отложенные эффекты болота срабатывают на ходе после пропущенного.
             var (r, c, arr, from) = _ctx.DelayedCell.Value;
             _ctx.DelayedCell = null;
             ApplyOtherEffects(r, c, arr, from, suppressEmptyMessage: true);
@@ -294,7 +278,6 @@ public class TurnController
             return true;
         }
 
-        // Эффекты начала хода переместили игрока — действие игрока отменяется.
         if (_ctx.Player.Row != startRow || _ctx.Player.Col != startCol)
         {
             FinishTurn();
@@ -308,7 +291,6 @@ public class TurnController
     {
         _ctx.OnTurnCompleted?.Invoke();   // UI рисует: Fills + PickedUpThisTurn
 
-        // После отрисовки — убираем «призраки» подобранных предметов.
         _ctx.PickedUpThisTurn.Clear();
 
         _ctx.FlushTurnMessages();
@@ -341,28 +323,54 @@ public class TurnController
 
         int before = _ctx.Messages.Count;
 
-        // Эффекты в порядке EffectOrder, по одному экземпляру каждого типа.
-        // Портал и река — эксклюзивны по порядку (после предметов).
+        bool movedAway = false;
+
+        // 1. Перемещающие и прочие эффекты — в порядке EffectOrder, КРОМЕ дракона.
         foreach (var type in EffectOrder)
         {
+            if (type == typeof(Dragon)) continue; // дракон — отдельно, в конце
+
             foreach (var fill in fills)
             {
                 if (fill.GetType() != type) continue;
+
                 fill.OnEnter(_ctx, row, col, arrival);
                 if (_ctx.IsWon) return;
+
+                if (_ctx.Player.Row != row || _ctx.Player.Col != col)
+                {
+                    movedAway = true;
+                    break;
+                }
             }
 
+            if (movedAway) break;
+
+            // Портал и река эксклюзивны по перемещению: после них другие
+            // перемещающие эффекты не применяем. Дракона обработаем ниже.
             if (type == typeof(Portal)
                 && fills.OfType<Portal>().Any()
                 && arrival != Arrival.FromPortal)
-                return;
+                break;
 
             if (type == typeof(River) && fills.OfType<River>().Any())
-                return;
+                break;
         }
 
-        // «Невидимые» эффекты (чужой ключ, выход без ключа) не добавили сообщения —
-        // значит, для игрока клетка выглядит пустой.
+        if (_ctx.IsWon) return;
+
+        // 2. Дракон: срабатывает, если игрок физически остался на этой клетке.
+        if (!movedAway
+            && _ctx.Player.Row == row && _ctx.Player.Col == col)
+        {
+            var dragon = fills.OfType<Dragon>().FirstOrDefault();
+            if (dragon != null)
+            {
+                dragon.OnEnter(_ctx, row, col, arrival);
+                if (_ctx.IsWon) return;
+            }
+        }
+
         if (!suppressEmptyMessage && _ctx.Messages.Count == before)
             _ctx.AddMessage("Вы прошли.");
     }

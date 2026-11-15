@@ -72,58 +72,115 @@ public class GameContext
         RiverCarryAction(row, col, flowOut);
     }
 
-    // ----- Дракон: запросы UI -----
-    public Action<DragonChoiceRequest> DragonChoiceHandler { get; set; }
-    public Action<DragonFightRequest> DragonFightHandler { get; set; }
+    // ----- Дракон -----
 
-    public void RequestDragonChoice(int row, int col)
+    /// <summary>Ожидается асинхронный ответ UI по дракону (выбор/бой).</summary>
+    public bool PendingDragonChoice { get; set; }
+
+    /// <summary>«Бежать» уже добавлено в этом эпизоде дракона (защита от дубля).</summary>
+    private bool _dragonFleeMessageAdded;
+
+    /// <summary>
+    /// Завершает эпизод дракона: гарантированно один раз добавляет
+    /// «Вы должны бежать от дракона.» и ставит обязательный доп. ход.
+    /// Вызывать последним — после всех сообщений дракона и результата выбора.
+    /// </summary>
+    public void FinishDragonEncounter()
     {
-        var req = new DragonChoiceRequest(row, col, Player.HasKey, Player.HasSword);
-        if (DragonChoiceHandler == null)
-        {
-            OnDragonChoice(row, col, giveKey: true); // fallback
-            return;
-        }
-        DragonChoiceHandler(req);
+        Player.MustMoveAgain = true;
+        if (_dragonFleeMessageAdded) return;
+        _dragonFleeMessageAdded = true;
+        AddMessage("Вы должны бежать от дракона.");
+    }
+
+    /// <summary>Сброс эпизода дракона (в начале нового эпизода / нового хода с драконом).</summary>
+    public void ResetDragonEncounter()
+    {
+        _dragonFleeMessageAdded = false;
+        PendingDragonChoice = false;
+    }
+
+    /// <summary>
+    /// Вызывается после того, как игрок ответил в UI дракона (выбор/бой).
+    /// Показывает сообщения и завершает «микро-ход» — чтобы UI отрисовал результат.
+    /// </summary>
+    public Action OnDragonResolved { get; set; }
+
+    private void ResolveDragonChoice()
+    {
+        OnDragonResolved?.Invoke();
+        FlushTurnMessages();
     }
 
     public void OnDragonChoice(int row, int col, bool giveKey)
     {
+        Messages.Clear();
+
         if (giveKey)
         {
             Player.RemoveKey();
             DragonStorage.TakeKey(Map, row, col, Player.PlayerNum);
-            AddMessage("Вы отдали ключ дракону.");
+            AddMessage("Вы оставили дракону ключ.");
         }
         else
         {
             Player.RemoveSword();
-            AddMessage("Вы отдали меч дракону.");
+            AddMessage("Вы оставили дракону меч.");
         }
-        Player.MustMoveAgain = true;
-    }
 
-    public void RequestDragonFight(int row, int col)
-    {
-        var req = new DragonFightRequest(row, col);
-        if (DragonFightHandler == null)
-        {
-            OnDragonFight(row, col, fight: true);
-            return;
-        }
-        DragonFightHandler(req);
+        PendingDragonChoice = false;
+        FinishDragonEncounter();   // «бежать» — последним, один раз
+        ResolveDragonChoice();
     }
 
     public void OnDragonFight(int row, int col, bool fight)
     {
+        Messages.Clear();
+
         if (fight)
         {
             Player.RemoveSword();
             DragonStorage.ReleaseKey(Map, row, col);
             Player.AddKey();
-            AddMessage("Вы сразились с драконом и забрали ключ. Меч сломан.");
+            AddMessage("Вы сразились с драконом и забрали свой ключ.");
         }
-        Player.MustMoveAgain = true;
+        else
+        {
+            AddMessage("Вы решили не сражаться с драконом.");
+        }
+
+        PendingDragonChoice = false;
+        FinishDragonEncounter();   // «бежать» — последним, один раз
+        ResolveDragonChoice();
+    }
+
+    // ----- Дракон: запросы UI -----
+    public Action<DragonChoiceRequest> DragonChoiceHandler { get; set; }
+    public Action<DragonFightRequest> DragonFightHandler { get; set; }
+    public void RequestDragonChoice(int row, int col)
+    {
+        var req = new DragonChoiceRequest(row, col, Player.HasKey, Player.HasSword);
+        PendingDragonChoice = true;
+        if (DragonChoiceHandler == null)
+        {
+            UnityEngine.Debug.LogWarning("[Dragon] DragonChoiceHandler не задан — fallback: отдать ключ.");
+            OnDragonChoice(row, col, giveKey: true);
+            return;
+        }
+        DragonChoiceHandler(req);
+    }
+
+    public void RequestDragonFight(int row, int col)
+    {
+        var req = new DragonFightRequest(row, col);
+        PendingDragonChoice = true;
+        if (DragonFightHandler == null)
+        {
+            UnityEngine.Debug.LogWarning("[Dragon] DragonFightHandler не задан — fallback: сражаться.");
+            OnDragonFight(row, col, fight: true);
+            return;
+        }
+        DragonFightHandler(req);
     }
 
     public GameContext(Map map, PlayerState player)
