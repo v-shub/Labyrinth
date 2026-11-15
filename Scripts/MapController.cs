@@ -1,8 +1,9 @@
 using System;
 using System.IO;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
 
 public class MapController : MonoBehaviour
 {
@@ -181,6 +182,8 @@ public class MapController : MonoBehaviour
             try
             {
                 _map.SaveToJson(path);
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+                AssetDatabase.Refresh();
             }
             catch (Exception ex)
             {
