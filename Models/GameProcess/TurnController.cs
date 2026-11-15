@@ -291,9 +291,11 @@ public class TurnController
                 if (_ctx.IsWon) return;
             }
 
-            // Портал и река приоритетны: если сработали — дальше не идём.
-            if (type == typeof(Portal) && fills.OfType<Portal>().Any())
+            if (type == typeof(Portal)
+                && fills.OfType<Portal>().Any()
+                && arrival != Arrival.FromPortal)
                 return;
+
             if (type == typeof(River) && fills.OfType<River>().Any())
                 return;
         }
