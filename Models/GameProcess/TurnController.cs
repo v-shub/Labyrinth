@@ -30,6 +30,9 @@ public class TurnController
         _ctx.RiverCarryAction = RiverCarryAndApply;
     }
 
+    /// <summary>Игра завершена (победа или поражение) — ходы запрещены.</summary>
+    private bool IsGameOver => _ctx.IsWon || _ctx.IsLost;
+
     // ============================================================
     //  Публичный API хода
     // ============================================================
@@ -40,7 +43,7 @@ public class TurnController
     /// </summary>
     public void StartGame()
     {
-        if (_ctx.IsWon) return;
+        if (IsGameOver) return;
 
         _ctx.Messages.Clear();
 
@@ -68,7 +71,7 @@ public class TurnController
     /// </summary>
     public void BeginTurn()
     {
-        if (_ctx.IsWon) return;
+        if (IsGameOver) return;
 
         _ctx.Messages.Clear();
 
@@ -114,7 +117,7 @@ public class TurnController
     /// <summary>Ход игрока в направлении.</summary>
     public void Move(Direction dir)
     {
-        if (_ctx.IsWon) return;
+        if (IsGameOver) return;
 
         _ctx.Messages.Clear();
 
@@ -179,7 +182,7 @@ public class TurnController
     /// <summary>Особое действие «нырок в портал» (только на клетке портала).</summary>
     public void DiveIntoPortal()
     {
-        if (_ctx.IsWon) return;
+        if (IsGameOver) return;
 
         _ctx.Messages.Clear();
 
@@ -250,6 +253,12 @@ public class TurnController
         // MustMoveAgain НЕ сбрасываем здесь — он нужен BeginTurn для запрета пропуска.
         // Сбрасывается в Move/DiveIntoPortal при реальном действии игрока.
 
+        if (IsGameOver)
+        {
+            FinishTurn();
+            return true;
+        }
+
         if (_ctx.SwampPhase != SwampPhase.None)
         {
             BeginTurn();
@@ -272,7 +281,7 @@ public class TurnController
             ApplyOtherEffects(r, c, arr, from, suppressEmptyMessage: true);
         }
 
-        if (_ctx.IsWon)
+        if (IsGameOver)
         {
             FinishTurn();
             return true;
@@ -289,6 +298,11 @@ public class TurnController
 
     private void FinishTurn()
     {
+        // Поражение проверяем ДО отрисовки, чтобы сообщение попало в HUD.
+        // Победа уже обрабатывается внутри Exit.OnEnter (Win()).
+        if (!_ctx.IsWon && _ctx.CheckDefeat())
+            _ctx.Lose();
+
         _ctx.OnTurnCompleted?.Invoke();   // UI рисует: Fills + PickedUpThisTurn
 
         _ctx.PickedUpThisTurn.Clear();

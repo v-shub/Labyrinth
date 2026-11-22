@@ -3684,6 +3684,8 @@ MonoBehaviour:
   dragonChoiceUI: {fileID: 553381720}
   dragonFightUI: {fileID: 2135726368}
   hud: {fileID: 1505536490}
+  endGameDelay: 10
+  sceneLoader: {fileID: 1049005670}
 --- !u!4 &1636044960
 Transform:
   m_ObjectHideFlags: 0

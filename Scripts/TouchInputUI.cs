@@ -13,6 +13,9 @@ public class TouchInputUI : MonoBehaviour
     [SerializeField] private Button upButton, downButton, leftButton, rightButton;
     [SerializeField] private Button diveButton;
 
+    /// <summary>Игра завершена (победа или поражение) — ввод заблокирован.</summary>
+    private bool GameOver => game.Context.IsWon || game.Context.IsLost;
+
     private void Awake()
     {
         upButton.onClick.AddListener(() => DoMove(Direction.Up));
@@ -24,7 +27,7 @@ public class TouchInputUI : MonoBehaviour
 
     private void Update()
     {
-        bool busy = (animator != null && animator.Busy) || game.Context.IsWon;
+        bool busy = (animator != null && animator.Busy) || GameOver;
         bool skip = game.Context.SwampPhase != SwampPhase.None;
         bool blocked = busy || skip;
 
@@ -41,21 +44,21 @@ public class TouchInputUI : MonoBehaviour
     // SkipLayer вызывает это.
     public void DoSkipTurn()
     {
-        if (animator == null || animator.Busy) return;
+        if (animator == null || animator.Busy || GameOver) return;
         if (game.Context.SwampPhase == SwampPhase.None) return;
         animator.RequestBeginTurn();
     }
 
     private void DoMove(Direction dir)
     {
-        if (animator == null || animator.Busy || game.Context.IsWon) return;
+        if (animator == null || animator.Busy || GameOver) return;
         if (TryConsumeSkipTurn()) return;
         animator.RequestMove(dir);
     }
 
     private void DoDive()
     {
-        if (animator == null || animator.Busy || game.Context.IsWon) return;
+        if (animator == null || animator.Busy || GameOver) return;
         if (TryConsumeSkipTurn()) return;
         animator.RequestDive();
     }

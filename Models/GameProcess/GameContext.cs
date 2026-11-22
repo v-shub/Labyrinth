@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GameContext
 {
@@ -49,9 +50,40 @@ public class GameContext
     public bool IsWon { get; private set; }
     public void Win()
     {
-        if (IsWon) return;
+        if (IsWon || IsLost) return;
         IsWon = true;
         OnWin?.Invoke();
+    }
+
+    // ----- Поражение -----
+    public Action OnLose { get; set; }
+    public bool IsLost { get; private set; }
+
+    public void Lose()
+    {
+        if (IsLost || IsWon) return;
+        IsLost = true;
+        AddMessage("Вы проиграли! Ваш ключ у дракона, а мечей больше не осталось.");
+        OnLose?.Invoke();
+    }
+
+    /// <summary>
+    /// Поражение: ключ игрока лежит у какого-то дракона,
+    /// и при этом ни у игрока, ни на карте нет ни одного меча.
+    /// </summary>
+    public bool CheckDefeat()
+    {
+        if (IsWon || IsLost) return false;
+        if (Player.HasKey) return false;                            // ключ у игрока — не поражение
+        if (!DragonStorage.HoldsKeyOf(Map, Player.PlayerNum)) return false;
+        if (Player.HasSword) return false;
+
+        for (int r = 0; r < Map.Rows; r++)
+            for (int c = 0; c < Map.Cols; c++)
+                if (Map[r, c].Fills.OfType<Sword>().Any())
+                    return false;
+
+        return true;
     }
 
     // ----- Мосты к TurnController (телепорт/река) -----

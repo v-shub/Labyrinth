@@ -12,6 +12,12 @@ public class GameBootstrap : MonoBehaviour
     [SerializeField] private DragonFightUI dragonFightUI;
     [SerializeField] private HudController hud;
 
+    [Header("End game")]
+    [Tooltip("Задержка перед выходом из сцены после победы/поражения, сек.")]
+    [SerializeField] private float endGameDelay = 3f;
+    [Tooltip("Загрузчик сцены для выхода после победы/поражения.")]
+    [SerializeField] private SceneLoader sceneLoader;
+
     public TurnController Turns { get; private set; }
     public GameContext Context { get; private set; }
 
@@ -53,8 +59,33 @@ public class GameBootstrap : MonoBehaviour
         Context.OnTurnCompleted = renderAndHistory;
         Context.OnDragonResolved = renderAndHistory;
 
+        // Победа: сообщение добавляется после «Вы нашли выход.»,
+        // затем через задержку — выход из сцены.
+        Context.OnWin = () =>
+        {
+            Context.AddMessage("Вы победили!");
+            StartCoroutine(ExitAfterDelay());
+        };
+
+        // Поражение: сообщение уже добавлено в GameContext.Lose(),
+        // здесь только запускаем задержку выхода из сцены.
+        Context.OnLose = () =>
+        {
+            StartCoroutine(ExitAfterDelay());
+        };
+
         // Старт игры: сразу применяем эффекты стартовой клетки.
         Turns.StartGame();
+    }
+
+    private System.Collections.IEnumerator ExitAfterDelay()
+    {
+        yield return new WaitForSeconds(endGameDelay);
+
+        if (sceneLoader != null)
+            sceneLoader.LoadScene();
+        else
+            UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 
     private static string FileFromTextAsset(TextAsset ta)

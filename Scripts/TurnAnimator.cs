@@ -14,6 +14,9 @@ public class TurnAnimator : MonoBehaviour
     private bool _busy;
     public bool Busy => _busy;
 
+    /// <summary>Игра завершена (победа или поражение) — анимации ходов запрещены.</summary>
+    private bool GameOver => game.Context.IsWon || game.Context.IsLost;
+
     private void Start()
     {
         // Первичная отрисовка при старте сцены (если GameBootstrap еще не сделал этого)
@@ -22,19 +25,19 @@ public class TurnAnimator : MonoBehaviour
 
     public void RequestMove(Direction dir)
     {
-        if (_busy || game.Context.IsWon) return;
+        if (_busy || GameOver) return;
         StartCoroutine(MoveRoutine(dir));
     }
 
     public void RequestDive()
     {
-        if (_busy || game.Context.IsWon) return;
+        if (_busy || GameOver) return;
         StartCoroutine(DiveRoutine());
     }
 
     public void RequestBeginTurn()
     {
-        if (_busy || game.Context.IsWon) return;
+        if (_busy || GameOver) return;
         StartCoroutine(BeginTurnRoutine());
     }
 
