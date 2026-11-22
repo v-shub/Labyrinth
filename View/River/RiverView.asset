@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9554089a140ee4443b0b6d57e1876e55, type: 3}
   m_Name: RiverView
   m_EditorClassIdentifier: Assembly-CSharp::RiverView
-  Sprite: {fileID: 21300000, guid: a4a958648c41b2749b44394c52883f59, type: 3}
+  Sprite: {fileID: -2726485831215555400, guid: 019272d5424fd4847a28d8671ac8856a, type: 3}
   _entries:
   - FlowIn: 0
     FlowOut: 1

@@ -3054,9 +3054,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TurnAnimator
   game: {fileID: 1636044959}
   cellView: {fileID: 1216778369}
-  pressDuration: 1
+  pressDuration: 0.1
   rubberRevealDuration: 3
-  arrivalDuration: 1
+  arrivalDuration: 0.1
 --- !u!4 &968662315
 Transform:
   m_ObjectHideFlags: 0
@@ -3505,7 +3505,6 @@ MonoBehaviour:
   dragonChoiceUI: {fileID: 553381720}
   dragonFightUI: {fileID: 2135726368}
   hud: {fileID: 1505536490}
-  turnAnimator: {fileID: 968662314}
 --- !u!4 &1636044960
 Transform:
   m_ObjectHideFlags: 0
