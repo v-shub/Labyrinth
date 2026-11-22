@@ -408,10 +408,10 @@ PrefabInstance:
     - target: {fileID: 6557477881300629227, guid: 522f05f2b3b6fc14f9a6236f24941613, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1641679042}
+      objectReference: {fileID: 1641679043}
     - target: {fileID: 6557477881300629227, guid: 522f05f2b3b6fc14f9a6236f24941613, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: 
+      value: LoadScene
       objectReference: {fileID: 0}
     - target: {fileID: 6557477881300629227, guid: 522f05f2b3b6fc14f9a6236f24941613, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -762,7 +762,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 334416898252104609, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
       propertyPath: sceneName
-      value: PlayingGame
+      value: MapInfo
       objectReference: {fileID: 0}
     - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -806,18 +806,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8487405766014896778, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
       propertyPath: m_Name
-      value: PlayingGameSceneLoader
+      value: MapInfoSceneLoader
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
---- !u!1 &1641679042 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8487405766014896778, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
+--- !u!114 &1641679043 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 334416898252104609, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
   m_PrefabInstance: {fileID: 1641679041}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09b9ab93e92386d4da77df21851e8efb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
 --- !u!1001 &1660268364
 PrefabInstance:
   m_ObjectHideFlags: 0

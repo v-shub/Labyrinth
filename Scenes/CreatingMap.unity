@@ -3501,7 +3501,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8487405766014896778, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
       propertyPath: m_Name
-      value: SceneLoader
+      value: MenuSceneLoader
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

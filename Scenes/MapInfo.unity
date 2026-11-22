@@ -330,7 +330,7 @@ GameObject:
   - component: {fileID: 183362349}
   - component: {fileID: 183362348}
   m_Layer: 5
-  m_Name: LetterChoiceDropDown (1)
+  m_Name: NumberChoiceDropDown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1201,67 +1201,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 514161989}
   m_CullTransparentMesh: 1
---- !u!1001 &546961482
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 334416898252104609, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: sceneName
-      value: PlayingGame
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 1504.225
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 569.0758
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2936327321449563732, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8487405766014896778, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
-      propertyPath: m_Name
-      value: PlayingGameSceneLoader
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 27b7e57af8c3e7646945cbc6cfdebfc4, type: 3}
 --- !u!1 &650076233
 GameObject:
   m_ObjectHideFlags: 0
@@ -1640,7 +1579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 258e8178649cba74684b4319d722481c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapInfo
-  mapJsonPath: map.json
+  mapFileName: map.json
   nameText: {fileID: 1014774509}
   descriptionText: {fileID: 322926831}
   bindings:
@@ -1803,6 +1742,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 787988396}
   m_CullTransparentMesh: 1
+--- !u!1 &795149177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 795149179}
+  - component: {fileID: 795149178}
+  m_Layer: 0
+  m_Name: StartGameWithParameters
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &795149178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 795149177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04a20702e17da0248a36027935eb1ef5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StartGameWithParameters
+  columnDropdown: {fileID: 1163463827}
+  rowDropdown: {fileID: 183362348}
+  gameSceneName: PlayingGame
+--- !u!4 &795149179
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 795149177}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 905.7629, y: 484.54382, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &801283547
 GameObject:
   m_ObjectHideFlags: 0
@@ -3060,6 +3046,18 @@ PrefabInstance:
     - target: {fileID: 6415833333372805076, guid: 522f05f2b3b6fc14f9a6236f24941613, type: 3}
       propertyPath: m_Name
       value: PlayGameButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 6557477881300629227, guid: 522f05f2b3b6fc14f9a6236f24941613, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 795149178}
+    - target: {fileID: 6557477881300629227, guid: 522f05f2b3b6fc14f9a6236f24941613, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnStartClicked
+      objectReference: {fileID: 0}
+    - target: {fileID: 6557477881300629227, guid: 522f05f2b3b6fc14f9a6236f24941613, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: StartGameWithParameters, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7377475226936016522, guid: 522f05f2b3b6fc14f9a6236f24941613, type: 3}
       propertyPath: m_text
@@ -5234,5 +5232,5 @@ SceneRoots:
   - {fileID: 1888854105}
   - {fileID: 1754553159}
   - {fileID: 1856139937}
-  - {fileID: 546961482}
   - {fileID: 720404447}
+  - {fileID: 795149179}
